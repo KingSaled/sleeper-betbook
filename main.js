@@ -1317,12 +1317,15 @@ async function setupPlayerProps() {
       'Unknown';
     const team = p.team || '';
 
+    const photoUrl = `https://sleepercdn.com/content/nfl/players/${playerId}.jpg`;
+
     candidates.push({
       playerId,
       name,
       position,
       team,
       projPts,
+      photoUrl,
     });
   });
 
@@ -1388,6 +1391,10 @@ function renderPlayerProps() {
     const card = document.createElement('div');
     card.className = 'prop-card';
 
+    // --- Left side: avatar + text ---
+    const left = document.createElement('div');
+    left.className = 'prop-left';
+
     const main = document.createElement('div');
     main.className = 'prop-main';
 
@@ -1405,12 +1412,28 @@ function renderPlayerProps() {
     main.appendChild(nameEl);
     main.appendChild(metaEl);
 
+    // Player headshot (optional)
+    const avatar = document.createElement('img');
+    avatar.className = 'prop-avatar';
+    avatar.alt = p.name;
+    avatar.src = p.photoUrl || '';
+    avatar.loading = 'lazy';
+    avatar.onerror = () => {
+      // Hide if the image 404s
+      avatar.style.display = 'none';
+    };
+
+    left.appendChild(avatar);
+    left.appendChild(main);
+
+    // --- Right side: odds + Add button ---
     const right = document.createElement('div');
     right.className = 'prop-right';
 
+    const odds = playerTopOddsById[p.playerId] ?? 5.0;
+
     const oddsEl = document.createElement('span');
     oddsEl.className = 'prop-odds-pill';
-    const odds = playerTopOddsById[p.playerId] ?? 5.0;
     oddsEl.textContent = `Odds: ${odds.toFixed(2)}`;
 
     const btn = document.createElement('button');
@@ -1424,7 +1447,7 @@ function renderPlayerProps() {
     right.appendChild(oddsEl);
     right.appendChild(btn);
 
-    card.appendChild(main);
+    card.appendChild(left);
     card.appendChild(right);
 
     list.appendChild(card);
@@ -2021,5 +2044,3 @@ function main() {
 }
 
 main();
-
-
