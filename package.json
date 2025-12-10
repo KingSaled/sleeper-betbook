@@ -1,0 +1,16 @@
+{
+  "name": "sleeper-betbook",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@instantdb/core": "^0.22.84"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

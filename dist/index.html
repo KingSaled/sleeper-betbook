@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sleeper Betbook</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Custom favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- Phosphor icons (web) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="module" crossorigin src="/assets/index-S5S6dblT.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BoqeIFhZ.css">
+  </head>
+  <body>
+    <div id="app-root">
+      <header class="app-header">
+        <h1>Sleeper Betbook</h1>
+      </header>
+
+      <main class="app-main">
+        <!-- Step 1: login -->
+        <section id="login-section" class="card">
+          <div class="card-header">
+            <i class="ph ph-plug card-title-icon"></i>
+            <span class="card-title-text">Connect Your Sleeper Account</span>
+          </div>
+
+          <div class="card-body">
+            <div class="form-row">
+              <label>
+                Sleeper username
+                <input
+                  id="sleeper-username"
+                  type="text"
+                  placeholder="your_sleeper_name"
+                />
+              </label>
+              <button id="login-btn" type="button">Connect</button>
+            </div>
+
+            <!-- Logged-in pill lives BELOW the form now -->
+            <div
+              id="login-user-pill"
+              class="status-pill status-pill-success"
+              hidden
+            >
+              Logged in as <span id="login-user-pill-name"></span>
+            </div>
+
+            <p id="login-status" class="status-text"></p>
+          </div>
+        </section>
+
+        <!-- Bankroll + bet slip -->
+        <section id="wallet-and-slip" class="grid-two" hidden>
+          <div class="card">
+            <div class="card-header">
+              <i class="ph ph-wallet card-title-icon"></i>
+              <span class="card-title-text">Your Bankroll</span>
+            </div>
+
+            <div class="wallet-summary">
+              <div class="wallet-row">
+                <span class="wallet-label">Balance</span>
+                <span id="wallet-balance" class="wallet-value">$0.00</span>
+              </div>
+              <div class="wallet-row wallet-pnl-row">
+                <span class="wallet-label">Wins/Losses</span>
+                <span id="wallet-pnl" class="wallet-value">+0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <i class="ph ph-receipt card-title-icon"></i>
+              <span class="card-title-text">Bet Slip</span>
+            </div>
+
+            <div id="betslip-legs" class="betslip-legs empty">
+              <p>No selections yet. Tap odds below to add legs to your slip.</p>
+            </div>
+
+            <div class="form-row stake-row">
+              <label>
+                Stake
+                <input
+                  id="betslip-stake"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value="10"
+                />
+              </label>
+              <button id="place-bet-btn" type="button">Place Bet</button>
+            </div>
+
+            <p id="betslip-summary" class="small-muted"></p>
+            <p id="betslip-error" class="status-text error"></p>
+          </div>
+        </section>
+
+        <!-- Bet props: matchups + player/team props -->
+        <section id="bet-props-section" class="card" hidden>
+          <div class="card-header">
+            <i class="ph ph-game-controller-2 card-title-icon"></i>
+            <span class="card-title-text">Bet Props</span>
+          </div>
+
+          <div class="prop-type-tabs">
+            <button id="prop-tab-matchups" class="prop-tab active">
+              Matchups
+            </button>
+            <button id="prop-tab-top-player" class="prop-tab">
+              Top Pts. Player
+            </button>
+            <button id="prop-tab-top-team" class="prop-tab">
+              Top Pts. Team
+            </button>
+          </div>
+
+          <!-- Matchups mode -->
+          <div id="prop-mode-matchups" class="prop-mode active">
+            <p class="small-muted">
+              Odds are per fantasy matchup for this week (<span id="week-number"
+                >–</span
+              >). Tap a side to add it to your slip.
+            </p>
+            <p class="small-muted" id="matchups-note"></p>
+            <div id="matchups-list" class="matchups-list"></div>
+          </div>
+
+          <!-- Top scoring player mode -->
+          <div id="prop-mode-top-player" class="prop-mode">
+            <div class="prop-position-pills">
+              <button class="prop-pos-pill active" data-pos="ALL">All</button>
+              <button class="prop-pos-pill" data-pos="QB">QB</button>
+              <button class="prop-pos-pill" data-pos="RB">RB</button>
+              <button class="prop-pos-pill" data-pos="WR">WR</button>
+              <button class="prop-pos-pill" data-pos="TE">TE</button>
+            </div>
+
+            <div id="player-props-list" class="props-list"></div>
+          </div>
+
+          <!-- Top scoring team mode -->
+          <div id="prop-mode-top-team" class="prop-mode">
+            <p class="small-muted">
+              Bet on which fantasy team in your league will score the most
+              points this week.
+            </p>
+            <div id="team-props-list" class="props-list"></div>
+          </div>
+        </section>
+
+        <!-- Your bets -->
+        <section id="bets-section" class="card" hidden>
+          <div class="card-header">
+            <i class="ph ph-list-checks card-title-icon"></i>
+            <span class="card-title-text">Your Bets</span>
+          </div>
+          <ul id="user-bets-list" class="bets-list"></ul>
+        </section>
+
+        <!-- Leaderboard -->
+        <section id="leaderboard-section" class="card" hidden>
+          <div class="card-header">
+            <i class="ph ph-trophy card-title-icon"></i>
+            <span class="card-title-text">Leaderboard</span>
+          </div>
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Balance</th>
+                <th>PnL</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+          </table>
+        </section>
+
+        <!-- Admin tools -->
+        <section id="admin-section" class="card admin-card" hidden>
+          <div class="card-header">
+            <i class="ph ph-gear-six card-title-icon"></i>
+            <span class="card-title-text">Admin Tools</span>
+          </div>
+          <details>
+            <summary>Show admin controls</summary>
+            <p class="small-muted">
+              Reset will wipe all bets and restore everyone’s bankroll back to
+              the default.
+            </p>
+            <div class="form-row">
+              <label>
+                Admin secret
+                <input id="admin-secret" type="password" />
+              </label>
+              <button id="admin-reset-btn" type="button">Reset league</button>
+            </div>
+            <p id="admin-reset-status" class="status-text"></p>
+          </details>
+          <hr class="admin-divider" />
+
+          <p class="small-muted">
+            Reset a single user’s password (they will be asked to create a new
+            one on their next login).
+          </p>
+          <div class="form-row">
+            <label>
+              Sleeper username
+              <input id="admin-reset-user" type="text" />
+            </label>
+            <button id="admin-reset-user-btn" type="button">
+              Clear password
+            </button>
+          </div>
+          <p id="admin-reset-user-status" class="status-text"></p>
+        </section>
+      </main>
+    </div>
+
+    <!-- Password modal -->
+    <div id="password-modal" class="modal-backdrop">
+      <div class="modal">
+        <h3 id="password-modal-title" class="modal-title"></h3>
+        <p id="password-modal-desc" class="modal-desc small-muted"></p>
+
+        <div class="modal-body">
+          <label class="modal-label">
+            Password
+            <input
+              id="password-modal-input"
+              type="password"
+              autocomplete="new-password"
+            />
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button
+            id="password-modal-cancel"
+            type="button"
+            class="btn-secondary"
+          >
+            Cancel
+          </button>
+          <button id="password-modal-confirm" type="button">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toasts -->
+    <div id="toast-container"></div>
+
+  </body>
+</html>
