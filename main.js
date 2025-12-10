@@ -1272,7 +1272,8 @@ async function setupPlayerProps() {
   const section = $('bet-props-section');
   const list = $('player-props-list');
   list.innerHTML = '';
-  section.hidden = true;
+  // 🔹 Do NOT force-hide the whole section here; mode + visibility are handled elsewhere
+  // section.hidden = true;
 
   if (!leagueState.matchups?.length) {
     return;
@@ -1334,19 +1335,24 @@ async function setupPlayerProps() {
     return;
   }
 
-  // enrich with historical averages
+  // 🔹 Enrich with historical averages
   await enrichPlayerCandidatesWithHistory(playerPropsCandidates);
 
-  // compute odds ONCE for the whole universe of players
+  // 🔹 Compute odds ONCE for the whole universe of players
   playerTopOddsById = computePlayerTopScorerOdds(playerPropsCandidates);
 
-  currentPropPosFilter = 'ALL';
-  document
-    .querySelectorAll('.prop-pos-pill')
-    .forEach((btn) =>
-      btn.classList.toggle('active', btn.dataset.pos === 'ALL')
-    );
+  // 🔹 Preserve the user’s existing filter if they had one
+  if (!currentPropPosFilter) {
+    currentPropPosFilter = 'ALL';
+  }
 
+  // 🔹 Re-highlight the active position pill based on currentPropPosFilter
+  document.querySelectorAll('.prop-pos-pill').forEach((btn) => {
+    const pos = btn.dataset.pos || 'ALL';
+    btn.classList.toggle('active', pos === currentPropPosFilter);
+  });
+
+  // 🔹 Re-render list using the preserved filter
   renderPlayerProps();
   section.hidden = false;
 }
@@ -2015,4 +2021,5 @@ function main() {
 }
 
 main();
+
 
