@@ -543,6 +543,21 @@ button:disabled {
   width: 132px; /* <-- shared width for odds + button */
 }
 
+.prop-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.prop-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .prop-odds-pill {
   padding: 4px 10px;
   border-radius: 999px;
