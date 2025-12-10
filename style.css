@@ -709,3 +709,79 @@ button:disabled {
   border: 1px solid rgba(148, 163, 184, 0.7);
   color: #e5e7eb;
 }
+
+/* ===== Recent results (league-wide) ===== */
+
+.recent-bet-separator {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9ca3af;
+  padding: 2px 0;
+}
+
+#recent-bets-section {
+  max-height: 260px; /* tweak up/down if you want */
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-bet-empty {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.recent-bet-result.placed {
+  color: #bfdbfe; /* soft blue for "placed" */
+}
+
+.recent-bets-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+
+  /* scrollable area */
+  flex: 1;
+  max-height: 200px; /* controls the scrolling area inside the card */
+  overflow-y: auto;
+  padding-right: 4px; /* room for scrollbar */
+  -webkit-overflow-scrolling: touch; /* nicer on mobile */
+}
+
+.recent-bet-item {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recent-bet-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recent-bet-result {
+  font-weight: 500;
+}
+
+.recent-bet-result.won {
+  color: #bbf7d0;
+}
+
+.recent-bet-result.lost {
+  color: #fecaca;
+}
+
+.recent-bet-week {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
