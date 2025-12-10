@@ -68,6 +68,9 @@ let projectionsRefreshTimer = null;
 let isPlacingBet = false;
 let isRefreshingLeague = false;
 
+let recentLeagueBets = []; // league-wide bets (for recent results)
+let recentBetsUnsub = null;
+
 // ----------------- HELPERS -----------------
 function computeTeamTopScoreOdds(teamList) {
   if (!teamList.length) return {};
@@ -499,6 +502,7 @@ async function loadLeagueData() {
 
     await setupPlayerProps();
     renderTeamProps(); // prepare team props, too
+    renderRecentBets();
 
     autoSettleForCurrentWeek();
   } catch (err) {
@@ -615,6 +619,31 @@ async function ensureWalletForUser(sleeperUserId, displayName) {
   });
 
   return resp2.data.wallets[0];
+}
+
+function subscribeRecentBets() {
+  if (recentBetsUnsub) recentBetsUnsub();
+
+  recentBetsUnsub = db.subscribeQuery(
+    {
+      bets: {
+        $: {
+          where: { leagueId: SLEEPER_LEAGUE_ID },
+          order: {
+            serverCreatedAt: 'desc',
+          },
+        },
+      },
+    },
+    (resp) => {
+      if (resp.error) {
+        console.error('recent bets subscription error', resp.error);
+        return;
+      }
+      recentLeagueBets = resp.data.bets || [];
+      renderRecentBets();
+    }
+  );
 }
 
 function subscribeWalletAndBets(sleeperUserId) {
@@ -1133,6 +1162,111 @@ function renderUserBets() {
 
     list.appendChild(li);
   });
+}
+
+function renderRecentBets() {
+  const section = $('recent-bets-section');
+  const list = $('recent-bets-list');
+  if (!section || !list) return;
+
+  // Always show the card; we'll handle "empty" via message
+  section.hidden = false;
+  list.innerHTML = '';
+
+  const bets = recentLeagueBets || [];
+
+  if (!bets.length) {
+    const li = document.createElement('li');
+    li.className = 'recent-bet-empty';
+    li.textContent = 'No bets placed in the league yet.';
+    list.appendChild(li);
+    return;
+  }
+
+  // Bets are already sorted newest-first by serverCreatedAt in subscribeRecentBets
+  const settled = bets
+    .filter((b) => b.status === 'won' || b.status === 'lost')
+    .slice(0, 10);
+
+  const placed = bets.filter((b) => b.status === 'open').slice(0, 10);
+
+  const addItem = (bet, kind) => {
+    const li = document.createElement('li');
+    li.className = 'recent-bet-item';
+
+    const mainRow = document.createElement('div');
+    mainRow.className = 'recent-bet-main';
+
+    const resultSpan = document.createElement('span');
+    resultSpan.className = 'recent-bet-result ' + kind;
+
+    const stake = bet.stake || 0;
+    const odds = bet.combinedOdds || 1;
+
+    // Try to get display name from wallets used in leaderboard
+    const wallet = (leaderboardWallets || []).find(
+      (w) => w.sleeperUserId === bet.sleeperUserId
+    );
+    const name = wallet?.displayName || 'Unknown';
+
+    if (kind === 'placed') {
+      // Recently placed (open) bet
+      resultSpan.textContent = `${name} placed ${formatMoney(
+        stake
+      )} @ ${odds.toFixed(2)} (Wk ${bet.week})`;
+    } else if (kind === 'won') {
+      const payout = stake * odds;
+      const profit = payout - stake;
+      resultSpan.textContent = `${name} won ${formatMoney(
+        profit
+      )} (stake ${formatMoney(stake)} @ ${odds.toFixed(2)} · Wk ${bet.week})`;
+    } else if (kind === 'lost') {
+      resultSpan.textContent = `${name} lost ${formatMoney(
+        stake
+      )} (stake ${formatMoney(stake)} @ ${odds.toFixed(2)} · Wk ${bet.week})`;
+    } else {
+      resultSpan.textContent = `${name} bet ${formatMoney(
+        stake
+      )} @ ${odds.toFixed(2)} (Wk ${bet.week})`;
+    }
+
+    mainRow.appendChild(resultSpan);
+    li.appendChild(mainRow);
+    list.appendChild(li);
+  };
+
+  let hasAny = false;
+
+  if (placed.length) {
+    const sep = document.createElement('li');
+    sep.className = 'recent-bet-separator';
+    sep.textContent = 'Recently placed';
+    list.appendChild(sep);
+
+    placed.forEach((bet) => {
+      addItem(bet, 'placed');
+    });
+    hasAny = true;
+  }
+
+  if (settled.length) {
+    const sep = document.createElement('li');
+    sep.className = 'recent-bet-separator';
+    sep.textContent = 'Recently settled';
+    list.appendChild(sep);
+
+    settled.forEach((bet) => {
+      addItem(bet, bet.status); // 'won' or 'lost'
+    });
+    hasAny = true;
+  }
+
+  if (!hasAny) {
+    const li = document.createElement('li');
+    li.className = 'recent-bet-empty';
+    li.textContent = 'No bets placed in the league yet.';
+    list.appendChild(li);
+  }
 }
 
 function renderLeaderboard() {
@@ -1894,6 +2028,7 @@ async function handleLogin() {
     // Start live subscriptions
     subscribeWalletAndBets(user.id);
     subscribeLeaderboard();
+    subscribeRecentBets();
 
     $('wallet-and-slip').hidden = false;
     $('bets-section').hidden = false;
@@ -2044,3 +2179,7 @@ function main() {
 }
 
 main();
+
+
+main();
+
