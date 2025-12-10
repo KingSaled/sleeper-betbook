@@ -1890,7 +1890,7 @@ async function handleLogin() {
 
       // periodic projection refresh (every 5 minutes)
       if (projectionsRefreshTimer) clearInterval(projectionsRefreshTimer);
-      projectionsRefreshTimer = setInterval(periodicLeagueRefresh, 5 * 60_000);
+      projectionsRefreshTimer = setInterval(periodicLeagueRefresh, 60_000);
 
       // periodic auto-settle check
       if (autoSettleTimer) clearInterval(autoSettleTimer);
@@ -2015,3 +2015,4 @@ function main() {
 }
 
 main();
+
